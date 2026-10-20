@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="My Laptop Guard - Lightweight personal Windows security background worker and live telemetry dashboard.">
+  <title>My Laptop Guard — Personal Windows Security Cockpit</title>
+  
+  <!-- Modern Google Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>MY LAPTOP GUARD</h1>
+          <span class="brand-tag">Windows Personal Security Telemetry</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="monitor-status-pill" id="monitorStatusPill">
+          <span class="status-orb" id="statusOrb"></span>
+          <span class="status-label" id="statusLabel">INITIALIZING</span>
+        </div>
+        <div class="admin-status-pill" id="adminStatusPill" title="Checks if My Laptop Guard has elevated administrator privileges">
+          <span class="admin-indicator" id="adminIndicator">STANDARD USER</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-icon" id="btnScanNow" title="Trigger immediate telemetry scan">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+          </svg>
+          <span>Scan Now</span>
+        </button>
+
+        <button class="btn btn-secondary btn-icon" id="btnThemeToggle" title="Toggle Dark/Light Mode">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+
+        <button class="btn btn-secondary btn-icon" id="btnSettings" title="Worker Settings & Authentication">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Top KPI Dashboard Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card" id="kpiConnections">
+        <div class="kpi-icon-box cyan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Active Connections</span>
+          <span class="kpi-value" id="kpiActiveConnValue">0</span>
+          <span class="kpi-meta" id="kpiConnMeta">Outbound: 0 | Inbound: 0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiListening">
+        <div class="kpi-icon-box violet">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Listening Ports</span>
+          <span class="kpi-value" id="kpiListeningValue">0</span>
+          <span class="kpi-meta" id="kpiListeningMeta">TCP & UDP Endpoints</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiRemoteAccess">
+        <div class="kpi-icon-box blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Remote Access</span>
+          <span class="kpi-value" id="kpiRemoteValue">Safe</span>
+          <span class="kpi-meta" id="kpiRemoteMeta">No active remote sessions</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiPosture">
+        <div class="kpi-icon-box emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Laptop Health Score</span>
+          <span class="kpi-value" id="kpiPostureValue">100 / 100</span>
+          <span class="kpi-meta" id="kpiPostureMeta">Grade: A (Protected)</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiFindings">
+        <div class="kpi-icon-box amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Suspicious Findings</span>
+          <span class="kpi-value" id="kpiFindingsValue">0</span>
+          <span class="kpi-meta" id="kpiFindingsMeta">0 Critical / High</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiDefender">
+        <div class="kpi-icon-box emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-label">Windows Defender</span>
+          <span class="kpi-value" id="kpiDefenderValue">Protected</span>
+          <span class="kpi-meta" id="kpiDefenderMeta">Real-time protection enabled</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="app-tabs">
+      <button class="tab-btn active" data-tab="tab-connections">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span>Live Connections</span>
+        <span class="tab-badge" id="badgeConnCount">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-listening">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+        <span>Listening Ports</span>
+        <span class="tab-badge" id="badgeListenCount">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-remote-access">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Remote Access & Spying</span>
+        <span class="tab-badge alert" id="badgeRemoteAccess" style="display:none;">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-respond">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Respond & Contain</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-outbound">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span>Suspicious Outbound</span>
+        <span class="tab-badge alert" id="badgeOutboundCount" style="display:none;">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-incidents">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+        <span>Incidents</span>
+        <span class="tab-badge alert" id="badgeIncidentsCount" style="display:none;">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-malware">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
+        <span>Malware Analysis</span>
+        <span class="tab-badge" id="badgeMalwareCount" style="display:none;">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-posture">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Security Posture</span>
+        <span class="tab-badge" id="badgePostureGrade">A</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-findings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Suspicious Findings</span>
+        <span class="tab-badge alert" id="badgeFindingsCount">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-processes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>Processes</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-startup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Startup & Persistence</span>
+        <span class="tab-badge" id="badgeStartupCount">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-defender">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Windows Defender</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-firewall">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Firewall Rules</span>
+        <span class="tab-badge" id="badgeFirewallCount">0</span>
+      </button>
+
+      <button class="tab-btn" data-tab="tab-logs">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Audit & Health</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <!-- TAB 1: Live Connections -->
+      <section class="tab-content active" id="tab-connections">
+        <div class="panel-header">
+          <div class="filter-group">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="connSearchInput" placeholder="Filter by Process, Remote IP, Port, or PID..." autocomplete="off">
+            </div>
+
+            <div class="pill-filters" id="connDirectionFilters">
+              <button class="filter-pill active" data-filter="all">All</button>
+              <button class="filter-pill" data-filter="OUTBOUND">Outbound</button>
+              <button class="filter-pill" data-filter="INBOUND">Inbound</button>
+              <button class="filter-pill" data-filter="LOCAL_LAN">LAN</button>
+              <button class="filter-pill" data-filter="LOOPBACK">Loopback</button>
+              <button class="filter-pill" data-filter="flagged">Flagged Only</button>
+            </div>
+          </div>
+
+          <div class="panel-meta">
+            <span class="live-indicator">
+              <span class="pulse-dot"></span> Real-time (Every 3s)
+            </span>
+            <button class="btn btn-secondary btn-sm" id="btnTogglePause">
+              <span id="pauseBtnLabel">Pause Stream</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="connectionsTable">
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>PID</th>
+                <th>Protocol</th>
+                <th>Local Address</th>
+                <th>Direction</th>
+                <th>Remote Address</th>
+                <th>State</th>
+                <th>Risk</th>
+                <th>First Seen</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="connectionsTableBody">
+              <tr>
+                <td colspan="10" class="empty-state">
+                  <div class="spinner"></div>
+                  <span>Inspecting active Windows TCP/UDP connections...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: Listening Ports -->
+      <section class="tab-content" id="tab-listening">
+        <div class="panel-header">
+          <div class="filter-group">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="listenSearchInput" placeholder="Search listening port, service, process, or PID..." autocomplete="off">
+            </div>
+
+            <div class="pill-filters" id="listenFilterPills">
+              <button class="filter-pill active" data-filter="all">All Ports</button>
+              <button class="filter-pill" data-filter="exposed">All Interfaces (0.0.0.0 / ::)</button>
+              <button class="filter-pill" data-filter="loopback">Localhost (127.0.0.1 / ::1)</button>
+              <button class="filter-pill" data-filter="tcp">TCP Only</button>
+              <button class="filter-pill" data-filter="udp">UDP Only</button>
+            </div>
+          </div>
+          <div class="panel-meta">
+            <span class="meta-note">Open sockets accepting incoming network traffic on this laptop</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="listeningTable">
+            <thead>
+              <tr>
+                <th>Port</th>
+                <th>Known Service / Purpose</th>
+                <th>Protocol</th>
+                <th>Bound Interface</th>
+                <th>Process</th>
+                <th>PID</th>
+                <th>Exposure Risk</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listeningTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: Suspicious Findings -->
+      <section class="tab-content" id="tab-findings">
+        <!-- Live Heuristic Engine Status Bar -->
+        <div class="findings-status-bar" style="margin-bottom: 1.25rem; padding: 0.85rem 1.15rem; background: var(--bg-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="live-indicator">
+              <span class="pulse-dot"></span> Heuristic Analysis Active (Real-Time 3s)
+            </span>
+            <span class="meta-note" id="findingsLiveTelemetry">Evaluating active sockets & listening ports across 5 behavioral threat models</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" id="btnTestDetection" title="Generates a safe test finding to verify real-time alert delivery and resolution flow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Test Alert Pipeline</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-header">
+          <div class="filter-group">
+            <div class="pill-filters" id="findingsSeverityFilters">
+              <button class="filter-pill active" data-severity="all">All Severities</button>
+              <button class="filter-pill" data-severity="CRITICAL">Critical</button>
+              <button class="filter-pill" data-severity="HIGH">High</button>
+              <button class="filter-pill" data-severity="MEDIUM">Medium</button>
+              <button class="filter-pill" data-severity="resolved">Resolved</button>
+            </div>
+          </div>
+          <div class="panel-meta">
+            <span class="meta-note">Evidence-based behavioral detections with clear explanations</span>
+          </div>
+        </div>
+
+        <div class="findings-container" id="findingsContainer">
+          <!-- Dynamically populated finding cards -->
+        </div>
+      </section>
+
+      <!-- TAB 4: Startup & Services -->
+      <section class="tab-content" id="tab-startup">
+        <div class="panel-header">
+          <div class="filter-group">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="startupSearchInput" placeholder="Filter startup items..." autocomplete="off">
+            </div>
+          </div>
+          <div class="panel-meta">
+            <span class="meta-note">Programs configured to start automatically with Windows</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="startupTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Location / Registry Key</th>
+                <th>Command Line Executable</th>
+                <th>User Context</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="startupTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 5: Windows Defender -->
+      <section class="tab-content" id="tab-defender">
+        <div class="defender-dashboard">
+          <div class="defender-overview-grid">
+            <div class="defender-card">
+              <div class="card-title">Real-Time Protection</div>
+              <div class="card-status-badge" id="defRealtimeBadge">Checking...</div>
+              <p class="card-desc">Monitors file operations, downloads, and processes in real-time.</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Antivirus Engine</div>
+              <div class="card-status-badge" id="defEngineBadge">Active</div>
+              <p class="card-desc">Microsoft Defender Core Antivirus Service.</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Cloud-Delivered Protection</div>
+              <div class="card-status-badge" id="defCloudBadge">Checking...</div>
+              <p class="card-desc">Cloud-based threat intelligence and rapid blocking.</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Security Intelligence Version</div>
+              <div class="card-mono-val" id="defSignatureVer">Checking...</div>
+              <p class="card-desc" id="defSignatureDate">Updated: Checking...</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Tamper Protection</div>
+              <div class="card-status-badge" id="defTamperBadge">Checking...</div>
+              <p class="card-desc">Prevents unauthorized changes to Windows security settings.</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Behavior Monitoring & NIS</div>
+              <div class="card-status-badge" id="defBehaviorBadge">Checking...</div>
+              <p class="card-desc">Heuristic behavioral analysis and Network Inspection System.</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Engine & Platform Build</div>
+              <div class="card-mono-val" id="defEngineVer">Checking...</div>
+              <p class="card-desc" id="defProductVer">Platform: Checking...</p>
+            </div>
+
+            <div class="defender-card">
+              <div class="card-title">Last Antivirus Scan</div>
+              <div class="card-mono-val" id="defLastScanVal">Checking...</div>
+              <p class="card-desc" id="defLastScanMeta">Scan status: Checking...</p>
+            </div>
+          </div>
+
+          <div class="content-split">
+            <div class="split-col">
+              <h3>Registered Windows Security Products</h3>
+              <ul class="clean-list" id="defProductsList">
+                <li>Scanning registered antivirus providers...</li>
+              </ul>
+            </div>
+
+            <div class="split-col">
+              <h3>Recent Defender Threat Detections</h3>
+              <div class="table-container small">
+                <table class="data-table" id="defenderThreatsTable">
+                  <thead>
+                    <tr>
+                      <th>Threat Name</th>
+                      <th>Time</th>
+                      <th>Resources</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="defenderThreatsTableBody">
+                    <tr><td colspan="4" class="empty-state">No active threat detections reported by Defender.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: Firewall Rules & System Security -->
+      <section class="tab-content" id="tab-firewall">
+        <!-- Live Windows Firewall Engine Overview -->
+        <div class="defender-overview-grid" style="margin-bottom: 1.25rem;">
+          <div class="defender-card">
+            <div class="card-title">Domain Network Profile</div>
+            <div class="card-status-badge" id="fwDomainStatus">ON</div>
+            <p class="card-desc">State: Protected (Inbound Blocked)</p>
+          </div>
+
+          <div class="defender-card">
+            <div class="card-title">Private Network Profile</div>
+            <div class="card-status-badge" id="fwPrivateStatus">ON</div>
+            <p class="card-desc">State: Protected (Home / Work LAN)</p>
+          </div>
+
+          <div class="defender-card">
+            <div class="card-title">Public Network Profile</div>
+            <div class="card-status-badge" id="fwPublicStatus">ON</div>
+            <p class="card-desc">State: Protected (Wi-Fi Hotspots / Untrusted)</p>
+          </div>
+
+          <div class="defender-card">
+            <div class="card-title">Active Windows Block Rules</div>
+            <div class="card-mono-val" id="fwSystemBlockCount">43 Rules</div>
+            <p class="card-desc">Native Windows & Application Filters</p>
+          </div>
+        </div>
+
+        <div class="panel-header">
+          <div class="panel-title-area">
+            <h2>Windows Firewall Rules Managed by Laptop Guard</h2>
+            <p>Rules created through this application to block unauthorized incoming or outgoing connections.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnManualBlockIp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Block New IP Address</span>
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="firewallTable">
+            <thead>
+              <tr>
+                <th>Rule Name</th>
+                <th>Target IP</th>
+                <th>Direction</th>
+                <th>Created At (UTC)</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="firewallTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- System-wide Windows Block Rules Inspection -->
+        <div style="margin-top: 1.5rem;">
+          <div class="panel-header" style="margin-bottom: 0.75rem;">
+            <div class="panel-title-area">
+              <h3>Active Windows System Block Rules</h3>
+              <p>Active block rules and blocked applications registered in Windows Advanced Firewall.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btnRefreshFwStatus">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>Refresh Status</span>
+            </button>
+          </div>
+          <div class="table-container small">
+            <table class="data-table" id="systemFirewallTable">
+              <thead>
+                <tr>
+                  <th>Rule Name / Application</th>
+                  <th>Direction</th>
+                  <th>Action</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="systemFirewallTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: Audit & Health Logs -->
+      <section class="tab-content" id="tab-logs">
+        <div class="content-split">
+          <div class="split-col">
+            <h3>Audit Trail</h3>
+            <p class="section-desc">Administrative actions, firewall rules, and security operations.</p>
+            <div class="table-container small">
+              <table class="data-table" id="auditTable">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Event</th>
+                    <th>Actor</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="split-col">
+            <h3>Collector Health & Latency</h3>
+            <p class="section-desc">Performance metrics and diagnostic logs per collector module.</p>
+            <div class="health-cards-container" id="healthCardsContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Remote Access & Spying Detection -->
+      <section class="tab-content" id="tab-remote-access">
+        <div class="status-banner safe" id="remoteStatusBanner">
+          <div class="banner-content">
+            <div class="banner-indicator"></div>
+            <div>
+              <div class="banner-title" id="remoteBannerTitle">No Remote Access Detected Right Now</div>
+              <div class="banner-desc" id="remoteBannerDesc">No active remote interactive desktop sessions or unauthorized management tools detected.</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnRefreshRemoteAccess">
+            <span>Refresh Scan</span>
+          </button>
+        </div>
+
+        <div class="split-col" style="margin-bottom: 1.5rem;">
+          <h3>Active Remote Sessions & RDP Logons</h3>
+          <p class="section-desc">Windows interactive desktop sessions (LogonType 10 / Terminal Services) and active network logons.</p>
+          <div class="table-container small">
+            <table class="data-table" id="remoteSessionsTable">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>User Account</th>
+                  <th>Logon Type</th>
+                  <th>Client Machine / IP</th>
+                  <th>State</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="remoteSessionsTableBody">
+                <tr><td colspan="6" class="empty-state">No remote interactive desktop sessions active.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="content-split" style="margin-bottom: 1.5rem;">
+          <div class="split-col">
+            <h3>Recognized Remote-Control Software</h3>
+            <p class="section-desc">Known tools (AnyDesk, TeamViewer, RustDesk, RMM agents, reverse tunnels) running on this machine.</p>
+            <div class="table-container small">
+              <table class="data-table" id="remoteToolsTable">
+                <thead>
+                  <tr>
+                    <th>Software</th>
+                    <th>Process Name</th>
+                    <th>PID</th>
+                    <th>Connection State</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="remoteToolsTableBody">
+                  <tr><td colspan="5" class="empty-state">No known remote-control tools running in background.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="split-col">
+            <h3>Camera & Microphone Sensor Activity</h3>
+            <p class="section-desc">Live streaming state from Windows CapabilityAccessManager ConsentStore metadata.</p>
+            <div class="table-container small">
+              <table class="data-table" id="remoteSensorsTable">
+                <thead>
+                  <tr>
+                    <th>Sensor</th>
+                    <th>Status</th>
+                    <th>Application</th>
+                    <th>Session Start</th>
+                  </tr>
+                </thead>
+                <tbody id="remoteSensorsTableBody">
+                  <tr><td colspan="4" class="empty-state">Camera and microphone sensors are currently idle.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-callout" style="padding: 1.25rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--accent-amber);">Honest Limitations of Remote Spying Detection</h4>
+          <p>• Cannot detect kernel-level rootkits, hypervisor implants, or hardware-based keyloggers connected to USB ports.</p>
+          <p>• Cannot read camera or microphone audio/video streams (metadata access timestamps only).</p>
+          <p>• Cannot distinguish an authorized workplace administrator from an unauthorized actor without your verification.</p>
+          <p>• If Windows auditing is disabled or running without administrator rights, some security event channels may be restricted.</p>
+        </div>
+      </section>
+
+      <!-- TAB: Incident Response & Safe Containment -->
+      <section class="tab-content" id="tab-respond">
+        <div class="status-banner safe" id="containmentStatusBanner">
+          <div class="banner-content">
+            <div class="banner-indicator"></div>
+            <div>
+              <div class="banner-title" id="containmentBannerTitle">Device Is Contained / Normal State</div>
+              <div class="banner-desc" id="containmentBannerDesc">All response actions require preview and explicit confirmation. Every operation is recorded in the audit log.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="response-actions-grid">
+          <div class="action-card">
+            <div class="action-card-header">
+              <div class="kpi-icon-box rose">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              </div>
+              <div>
+                <div class="action-card-title">1. Block Remote IP in Windows Firewall</div>
+                <div class="action-card-desc">Instantly creates inbound and outbound Windows Firewall block rules for a suspicious IP address.</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="respondIpInput" placeholder="Enter IP address to block" class="form-input" style="flex: 1;">
+              <button class="btn btn-danger btn-sm" id="btnRespondBlockIp">Block IP</button>
+            </div>
+          </div>
+
+          <div class="action-card">
+            <div class="action-card-header">
+              <div class="kpi-icon-box amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+              </div>
+              <div>
+                <div class="action-card-title">2. Disconnect Remote Session ID</div>
+                <div class="action-card-desc">Safely terminates a specific remote interactive desktop session (never disconnects your local console).</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="number" id="respondSessionInput" placeholder="Session ID (e.g. 2)" class="form-input" style="flex: 1;">
+              <button class="btn btn-warning btn-sm" id="btnRespondDisconnectSession">Disconnect</button>
+            </div>
+          </div>
+
+          <div class="action-card">
+            <div class="action-card-header">
+              <div class="kpi-icon-box blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div>
+                <div class="action-card-title">3. Emergency Network Isolation</div>
+                <div class="action-card-desc">Temporarily disables all network adapters with an automatic 5-minute safety restore countdown.</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <button class="btn btn-danger btn-sm" id="btnRespondIsolateNetwork">Isolate Laptop</button>
+              <button class="btn btn-secondary btn-sm" id="btnRespondRestoreNetwork">Restore Network</button>
+            </div>
+          </div>
+
+          <div class="action-card">
+            <div class="action-card-header">
+              <div class="kpi-icon-box emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div>
+                <div class="action-card-title">4. Tamper-Evident Evidence Pack</div>
+                <div class="action-card-desc">Export verified forensic timeline with SHA-256 integrity hash for IT departments or authorities.</div>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm" id="btnGenerateEvidencePack">Export Evidence Pack</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="evidencePackResult" style="display: none; background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
+          <h4 style="color: var(--accent-cyan); margin-top: 0;">Evidence Package Generated Successfully</h4>
+          <p class="section-desc">SHA-256 cryptographic integrity hash for forensic verification:</p>
+          <div class="hash-container" id="evidencePackHash">Loading...</div>
+          <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary btn-sm" id="btnDownloadEvidenceJson">Download JSON Record</button>
+            <button class="btn btn-secondary btn-sm" id="btnOpenEvidenceHtml">Open HTML Evidence Report</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Suspicious Outbound & Reverse Shells (Section 16.1a) -->
+      <section class="tab-content" id="tab-outbound">
+        <div class="status-banner safe" id="outboundStatusBanner">
+          <div class="banner-content">
+            <div class="banner-indicator"></div>
+            <div>
+              <div class="banner-title" id="outboundBannerTitle">No Suspicious Outbound Traffic Detected</div>
+              <div class="banner-desc" id="outboundBannerDesc">Monitoring interpreter processes (cmd, powershell, pwsh, python, etc.) owning outbound sockets to raw IPs or reverse shell ports, with parent analysis and beacon interval/jitter calculations.</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnRefreshOutbound">
+            <span>Refresh Scan</span>
+          </button>
+        </div>
+
+        <div class="panel-header">
+          <div class="panel-title-area">
+            <h2>Suspicious Outbound Profiles</h2>
+            <p>Potential reverse shells, automated beaconing, or command-and-control channels originating from this laptop.</p>
+          </div>
+          <span class="live-indicator">
+            <span class="pulse-dot"></span> Defensive Local Analysis Only
+          </span>
+        </div>
+
+        <div id="outboundProfilesContainer">
+          <div class="empty-state">No suspicious outbound connections or reverse shell indicators detected.</div>
+        </div>
+
+        <div class="info-callout" style="margin-top: 1.5rem; padding: 1.25rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--accent-amber);">Safety Boundary and Detection Criteria</h4>
+          <p>• Defensive local-only detection: My Laptop Guard NEVER connects to, scans, probes, or sends data to any remote peer.</p>
+          <p>• Reverse-shell indicators combine interpreter processes, raw IP peers, suspicious parent chains (Office/Browser/PDF), encoded command arguments, and beacon interval/jitter metrics.</p>
+          <p>• Findings represent indicators for defensive triage, not mathematical proof of an intrusion.</p>
+        </div>
+      </section>
+
+      <!-- TAB: Correlated Incidents Timeline -->
+      <section class="tab-content" id="tab-incidents">
+        <div class="panel-header">
+          <div class="panel-title-area">
+            <h2>Security Incidents & Attack Chains</h2>
+            <p>Correlated multi-signal events grouped into unified incident timelines.</p>
+          </div>
+          <div class="pill-filters" id="incidentsFilterPills">
+            <button class="filter-pill active" data-filter="all">All Incidents</button>
+            <button class="filter-pill" data-filter="OPEN">Open</button>
+            <button class="filter-pill" data-filter="CONTAINED">Contained</button>
+            <button class="filter-pill" data-filter="RESOLVED">Resolved</button>
+          </div>
+        </div>
+
+        <div id="incidentsContainer">
+          <div class="empty-state">No correlated incidents currently active. Normal state.</div>
+        </div>
+      </section>
+
+      <!-- TAB: Malware Analysis & Reverse Engineering (Section 17) -->
+      <section class="tab-content" id="tab-malware">
+        <div class="analysis-input-panel">
+          <div class="panel-header" style="margin-bottom: 1rem; border: none; padding: 0;">
+            <div class="panel-title-area">
+              <h2>Defensive Static Malware Analysis</h2>
+              <p>Analyze local files already present on this laptop. Completely isolated: zero network requests, no dynamic execution, no cloud uploads.</p>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="malwareFilePathInput">Local File Path to Inspect (Absolute Path)</label>
+            <div style="display: flex; gap: 0.75rem;">
+              <input type="text" id="malwareFilePathInput" class="form-input" style="flex: 1;" placeholder="C:\Users\username\Downloads\suspicious_file.exe">
+              <button class="btn btn-primary" id="btnRunMalwareAnalysis">Run Static Analysis</button>
+            </div>
+            <small class="form-help">Performs local PE header parsing, section entropy calculation, Authenticode verification, string extraction, and passive IOC extraction.</small>
+          </div>
+
+          <div class="checkbox-label" style="margin-bottom: 0.5rem;">
+            <input type="checkbox" id="malwareSystemDirConfirm">
+            <span>Confirm analysis if file is in a system directory. File contents are inspected strictly in read-only mode.</span>
+          </div>
+        </div>
+
+        <!-- Analysis Results Container -->
+        <div id="malwareResultsContainer" style="display: none;">
+          <div class="panel-header">
+            <div class="panel-title-area">
+              <h3 id="malwareReportFileName">Analysis Report</h3>
+              <p id="malwareReportTimestamp">Generated at: </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-secondary btn-sm" id="btnDownloadMalwareJson">Download JSON</button>
+              <button class="btn btn-secondary btn-sm" id="btnOpenMalwareHtml">Open HTML Report</button>
+              <button class="btn btn-secondary btn-sm" id="btnExportGhidraHandoff">Export for Ghidra / x64dbg</button>
+            </div>
+          </div>
+
+          <div class="analysis-meta-grid">
+            <div class="analysis-stat-card">
+              <div class="analysis-stat-label">SHA-256 Hash</div>
+              <div class="analysis-stat-value mono" id="malwareSha256" style="font-size: 0.75rem;">-</div>
+            </div>
+            <div class="analysis-stat-card">
+              <div class="analysis-stat-label">File Size & Magic Type</div>
+              <div class="analysis-stat-value" id="malwareSizeMagic">-</div>
+            </div>
+            <div class="analysis-stat-card">
+              <div class="analysis-stat-label">Authenticode Signature</div>
+              <div class="analysis-stat-value" id="malwareSignature">-</div>
+            </div>
+            <div class="analysis-stat-card">
+              <div class="analysis-stat-label">Report Integrity Hash</div>
+              <div class="analysis-stat-value mono" id="malwareReportHash" style="font-size: 0.75rem;">-</div>
+            </div>
+          </div>
+
+          <!-- PE Section Entropy Table -->
+          <div class="split-col" style="margin-bottom: 1.5rem;" id="peSectionsContainer">
+            <h3>PE Header & Section Entropy</h3>
+            <p class="section-desc">Shannon entropy per section (values greater than 7.0 indicate compression or packing).</p>
+            <div class="table-container small">
+              <table class="data-table" id="peSectionsTable">
+                <thead>
+                  <tr>
+                    <th>Section Name</th>
+                    <th>Virtual Size</th>
+                    <th>Raw Data Size</th>
+                    <th>Entropy (Bits/Byte)</th>
+                    <th>Packing Risk</th>
+                  </tr>
+                </thead>
+                <tbody id="peSectionsTableBody">
+                  <tr><td colspan="5" class="empty-state">No PE sections found.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Inferred Capabilities -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3>Inferred Behavioral Capabilities</h3>
+            <p class="section-desc">Capabilities inferred from imports, exports, and string patterns. Stated as indicators, not proof.</p>
+            <div class="capabilities-grid" id="malwareCapabilitiesGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Passive IOC Extraction -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3>Extracted Indicators of Compromise (Passive)</h3>
+            <p class="section-desc">Extracted strings matching IP, domain, URL, registry, and mutex patterns. No network verification performed.</p>
+            <div class="capabilities-grid" id="malwareIocGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Secret-Redacted Strings Sample -->
+          <div style="margin-bottom: 1.5rem;">
+            <h3>Extracted Strings (Secret-Redacted)</h3>
+            <p class="section-desc">First 200 printable strings extracted from file with credentials and API tokens automatically redacted.</p>
+            <pre class="strings-box" id="malwareStringsBox">Loading strings...</pre>
+          </div>
+
+          <!-- VM Dynamic Handoff Guide -->
+          <div class="info-callout" style="padding: 1.25rem;">
+            <h4 style="font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">Safe Dynamic Analysis Instructions (Isolated VM Only)</h4>
+            <p>1. Never run untrusted executables on this host laptop.</p>
+            <p>2. Copy the sample into an isolated Virtual Machine configured with host-only or disabled networking.</p>
+            <p>3. Take a clean VM snapshot prior to running any sample.</p>
+            <p>4. Monitor execution using Process Monitor (Procmon), Wireshark (capturing local loopback/host-only traffic), and x64dbg.</p>
+            <p>5. Revert the VM to the clean snapshot after analysis is complete.</p>
+          </div>
+        </div>
+
+        <!-- Recent Analysis Reports History -->
+        <div style="margin-top: 2rem;">
+          <div class="panel-header" style="margin-bottom: 0.75rem;">
+            <div class="panel-title-area">
+              <h3>Previous Analysis Reports</h3>
+              <p>Locally stored reports saved in SQLite database.</p>
+            </div>
+          </div>
+          <div class="table-container small">
+            <table class="data-table" id="malwareHistoryTable">
+              <thead>
+                <tr>
+                  <th>Target File</th>
+                  <th>Size</th>
+                  <th>SHA-256</th>
+                  <th>Capabilities Count</th>
+                  <th>Analyzed At (UTC)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="malwareHistoryTableBody">
+                <tr><td colspan="6" class="empty-state">No previous reports generated yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Security Posture Assessment -->
+      <section class="tab-content" id="tab-posture">
+        <div class="posture-header-card">
+          <div class="posture-score-wrap">
+            <div class="posture-score-num" id="postureScoreDisplay">100</div>
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Windows Security Posture Score</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);" id="postureStatusSummary">Overall health is excellent. Core protections active.</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="grade-badge A" id="postureGradeBadge">A</div>
+            <button class="btn btn-secondary btn-sm" id="btnRefreshPosture">Re-evaluate Now</button>
+          </div>
+        </div>
+
+        <div class="split-col" style="margin-bottom: 1.5rem;">
+          <h3>Security Deductions & Recommendations</h3>
+          <p class="section-desc">Itemized configuration weaknesses with plain-English fixes and exact Windows settings paths.</p>
+          <div class="table-container small">
+            <table class="data-table" id="postureDeductionsTable">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Security Finding</th>
+                  <th>Points Deducted</th>
+                  <th>Current State</th>
+                  <th>Recommended Setting</th>
+                  <th>Windows Settings Path</th>
+                </tr>
+              </thead>
+              <tbody id="postureDeductionsTableBody">
+                <tr><td colspan="6" class="empty-state">No security deductions! All evaluated safeguards are active.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Process Catalogue -->
+      <section class="tab-content" id="tab-processes">
+        <div class="panel-header">
+          <div class="filter-group">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="procSearchInput" placeholder="Filter processes by name or executable path..." autocomplete="off">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="processesTable">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Process Name</th>
+                <th>Executable Path</th>
+                <th>First Seen (UTC)</th>
+                <th>Last Seen (UTC)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="processesTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: Connection & Process Inspector -->
+  <div class="modal-overlay" id="inspectModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="inspectModalTitle">Process & Socket Inspection</h3>
+        <button class="modal-close-btn" id="inspectModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="inspectModalBody">
+        <!-- Dynamically rendered -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="inspectModalDismiss">Close</button>
+        <button class="btn btn-danger" id="inspectModalBlockBtn">Block Destination IP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Firewall Confirmation Modal -->
+  <div class="modal-overlay" id="firewallModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Windows Firewall Rule</h3>
+        <button class="modal-close-btn" id="firewallModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="fwTargetIp">Target IP Address to Block</label>
+          <input type="text" id="fwTargetIp" placeholder="e.g. 198.51.100.24" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="fwDirection">Direction</label>
+          <select id="fwDirection" class="form-input">
+            <option value="BOTH">Block BOTH Inbound & Outbound</option>
+            <option value="OUT">Block Outbound Only</option>
+            <option value="IN">Block Inbound Only</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fwComment">Reason / Notes</label>
+          <input type="text" id="fwComment" placeholder="Optional notes (e.g. Blocked suspicious connection)" class="form-input">
+        </div>
+
+        <!-- Preview Box -->
+        <div class="rule-preview-box">
+          <div class="preview-title">Rule Details & Affected Traffic</div>
+          <p id="fwTrafficExplanation" class="preview-desc">Loading preview...</p>
+          
+          <div class="code-preview-wrap">
+            <span class="code-preview-label">Exact netsh command to execute:</span>
+            <pre class="code-preview" id="fwNetshPreview">Loading...</pre>
+          </div>
+
+          <div class="admin-notice" id="fwAdminNotice">
+            Checking administrator permissions...
+          </div>
+
+          <div class="safety-disclaimer">
+            <strong>Important Safety Notice:</strong> Windows Firewall filters incoming and outgoing network packets matching this rule. If an existing TCP socket was already connected, it may remain open until closed or timed out by the OS.
+          </div>
+        </div>
+
+        <div class="confirmation-checkbox-wrap">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fwConfirmCheckbox">
+            <span>I have verified the destination IP and confirm creating this Windows Firewall rule.</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCopyPowershellFw">Copy PowerShell Command</button>
+        <button class="btn btn-danger" id="btnExecuteFwBlock" disabled>Execute Block Rule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Settings & Authentication -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Worker Settings & Security</h3>
+        <button class="modal-close-btn" id="settingsModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="settingsAuthToken">API Authentication Token</label>
+          <input type="password" id="settingsAuthToken" class="form-input" placeholder="Enter API Auth Token">
+          <small class="form-help">Token required for firewall actions and resolving findings.</small>
+        </div>
+
+        <div class="info-callout">
+          <h4>Security Architecture</h4>
+          <p>• Server binds strictly to <code>127.0.0.1</code> to prevent network exposure.</p>
+          <p>• All telemetry, SQLite database tables, and logs remain strictly on this laptop.</p>
+          <p>• Never captures keystrokes, screenshots, passwords, or personal messages.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnSaveSettings">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
