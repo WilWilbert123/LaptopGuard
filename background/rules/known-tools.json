@@ -1,0 +1,272 @@
+[
+  {
+    "id": "anydesk",
+    "name": "AnyDesk",
+    "category": "Remote Desktop Software",
+    "processNames": ["anydesk.exe"],
+    "serviceNames": ["AnyDesk", "AnyDesk Service"],
+    "defaultPorts": [7070],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "teamviewer",
+    "name": "TeamViewer",
+    "category": "Remote Desktop Software",
+    "processNames": ["teamviewer.exe", "teamviewer_service.exe"],
+    "serviceNames": ["TeamViewer"],
+    "defaultPorts": [5938],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "rustdesk",
+    "name": "RustDesk",
+    "category": "Remote Desktop Software",
+    "processNames": ["rustdesk.exe", "rustdesk-service.exe"],
+    "serviceNames": ["RustDesk", "rustdesk"],
+    "defaultPorts": [21115, 21116, 21117, 21118, 21119],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "chrome_remote_desktop",
+    "name": "Chrome Remote Desktop",
+    "category": "Remote Desktop Software",
+    "processNames": ["remoting_host.exe"],
+    "serviceNames": ["chromoting"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "screenconnect",
+    "name": "ConnectWise ScreenConnect",
+    "category": "Remote Support / RMM",
+    "processNames": ["screenconnect.clientservice.exe", "screenconnect.windowsclient.exe"],
+    "serviceNames": ["ScreenConnect Client"],
+    "defaultPorts": [8040, 8041],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "splashtop",
+    "name": "Splashtop",
+    "category": "Remote Desktop Software",
+    "processNames": ["srservice.exe", "srfeature.exe", "strwinclt.exe"],
+    "serviceNames": ["Splashtop Remote Service"],
+    "defaultPorts": [6783],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "logmein",
+    "name": "LogMeIn",
+    "category": "Remote Desktop Software",
+    "processNames": ["logmein.exe", "ramservice.exe"],
+    "serviceNames": ["LogMeIn"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "gotoassist",
+    "name": "GoToAssist",
+    "category": "Remote Support",
+    "processNames": ["g2ax_comm_host.exe", "g2am_host.exe"],
+    "serviceNames": ["GoToAssist"],
+    "defaultPorts": [],
+    "isDangerousUnattended": false
+  },
+  {
+    "id": "zoho_assist",
+    "name": "Zoho Assist",
+    "category": "Remote Support",
+    "processNames": ["zohoassist.exe", "zohoursservice.exe"],
+    "serviceNames": ["ZohoURSService"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "vnc_server",
+    "name": "VNC Server (RealVNC / TightVNC / UltraVNC / TigerVNC)",
+    "category": "Remote Desktop Protocol",
+    "processNames": ["winvnc.exe", "vncserver.exe", "tvnserver.exe", "winvnc4.exe"],
+    "serviceNames": ["winvnc", "tvnserver", "vncserver"],
+    "defaultPorts": [5900, 5901, 5902],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "nomachine",
+    "name": "NoMachine",
+    "category": "Remote Desktop Software",
+    "processNames": ["nxserver.bin", "nxserver.exe", "nxd.exe"],
+    "serviceNames": ["nxserver"],
+    "defaultPorts": [4000],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "parsec",
+    "name": "Parsec",
+    "category": "Remote Desktop Software",
+    "processNames": ["parsecd.exe", "parsec.exe"],
+    "serviceNames": ["Parsec"],
+    "defaultPorts": [],
+    "isDangerousUnattended": false
+  },
+  {
+    "id": "radmin",
+    "name": "Radmin",
+    "category": "Remote Administration Tool",
+    "processNames": ["r_server.exe", "radmin.exe"],
+    "serviceNames": ["Radmin Server", "r_server"],
+    "defaultPorts": [4899],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "dwservice",
+    "name": "DWService",
+    "category": "Remote Access Agent",
+    "processNames": ["dwagent.exe"],
+    "serviceNames": ["DWAgent"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "supremo",
+    "name": "Supremo",
+    "category": "Remote Desktop Software",
+    "processNames": ["supremo.exe", "supremohelper.exe"],
+    "serviceNames": ["SupremoService"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "ammyy_admin",
+    "name": "Ammyy Admin",
+    "category": "Remote Desktop Tool",
+    "processNames": ["ammyy.exe", "aa_v3.exe"],
+    "serviceNames": ["AmmyyAdmin"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "remotepc",
+    "name": "RemotePC",
+    "category": "Remote Desktop Software",
+    "processNames": ["remotepc.exe", "rpchost.exe"],
+    "serviceNames": ["RPCService"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "atera",
+    "name": "Atera RMM Agent",
+    "category": "Remote Management & Monitoring",
+    "processNames": ["ateraagent.exe"],
+    "serviceNames": ["AteraAgent"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "nable",
+    "name": "N-able Take Control / RMM",
+    "category": "Remote Management & Monitoring",
+    "processNames": ["basupsrvc.exe", "agent.exe"],
+    "serviceNames": ["BASupSrvc"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "kaseya",
+    "name": "Kaseya VSA Agent",
+    "category": "Remote Management & Monitoring",
+    "processNames": ["agentmon.exe"],
+    "serviceNames": ["KaseyaAgent"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "ninjarmm",
+    "name": "NinjaOne / NinjaRMM Agent",
+    "category": "Remote Management & Monitoring",
+    "processNames": ["ninjarmmagent.exe"],
+    "serviceNames": ["NinjaRMMAgent"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "meshcentral",
+    "name": "MeshCentral MeshAgent",
+    "category": "Remote Administration Agent",
+    "processNames": ["meshagent.exe"],
+    "serviceNames": ["Mesh Agent", "meshagent"],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "tailscale",
+    "name": "Tailscale Mesh VPN",
+    "category": "Mesh Overlay Network",
+    "processNames": ["tailscale.exe", "tailscaled.exe"],
+    "serviceNames": ["Tailscale"],
+    "defaultPorts": [41641],
+    "isDangerousUnattended": false
+  },
+  {
+    "id": "zerotier",
+    "name": "ZeroTier One",
+    "category": "Virtual Network Overlay",
+    "processNames": ["zerotier-one_x64.exe", "zerotier-one.exe"],
+    "serviceNames": ["ZeroTierOneService"],
+    "defaultPorts": [9993],
+    "isDangerousUnattended": false
+  },
+  {
+    "id": "ngrok",
+    "name": "ngrok Reverse Tunnel",
+    "category": "Port Forwarding / Reverse Proxy",
+    "processNames": ["ngrok.exe"],
+    "serviceNames": [],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "cloudflared",
+    "name": "Cloudflare Tunnel (cloudflared)",
+    "category": "Port Forwarding / Reverse Tunnel",
+    "processNames": ["cloudflared.exe"],
+    "serviceNames": ["Cloudflared"],
+    "defaultPorts": [],
+    "isDangerousUnattended": false
+  },
+  {
+    "id": "frp",
+    "name": "FRP Reverse Proxy",
+    "category": "Port Forwarding / Reverse Tunnel",
+    "processNames": ["frpc.exe", "frps.exe"],
+    "serviceNames": [],
+    "defaultPorts": [7000],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "chisel",
+    "name": "Chisel TCP/UDP Tunnel",
+    "category": "Reverse SOCKS / Port Forwarder",
+    "processNames": ["chisel.exe"],
+    "serviceNames": [],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "plink_ssh",
+    "name": "PuTTY Plink / SSH Tunnel",
+    "category": "SSH Port Forwarding / Tunnel",
+    "processNames": ["plink.exe"],
+    "serviceNames": [],
+    "defaultPorts": [],
+    "isDangerousUnattended": true
+  },
+  {
+    "id": "openssh_server",
+    "name": "OpenSSH Server",
+    "category": "SSH Remote Shell Service",
+    "processNames": ["sshd.exe"],
+    "serviceNames": ["sshd", "OpenSSH Server"],
+    "defaultPorts": [22],
+    "isDangerousUnattended": true
+  }
+]

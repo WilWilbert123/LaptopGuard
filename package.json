@@ -1,0 +1,30 @@
+{
+  "name": "my-laptop-guard",
+  "version": "1.0.0",
+  "description": "Lightweight personal Windows laptop security background worker and live dashboard",
+  "main": "background/server.js",
+  "scripts": {
+    "start": "node background/server.js",
+    "dev": "node background/server.js",
+    "test": "node test/test-all.js",
+    "install-service": "powershell -ExecutionPolicy Bypass -File scripts/install-service.ps1",
+    "uninstall-service": "powershell -ExecutionPolicy Bypass -File scripts/uninstall-service.ps1",
+    "check-perms": "powershell -ExecutionPolicy Bypass -File scripts/check-permissions.ps1"
+  },
+  "keywords": [
+    "windows-security",
+    "background-worker",
+    "firewall-manager",
+    "defender-telemetry",
+    "connection-monitor",
+    "network-security"
+  ],
+  "author": "MIS-WILBERT",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

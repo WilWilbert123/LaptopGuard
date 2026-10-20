@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# SQLite Database & Write-Ahead Logs
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
+# Log files
+*.log
+npm-debug.log*
+
+# System files
+Thumbs.db
+.DS_Store
+
+# Temporary scratch & tests
+test_out/
+.system_generated/
