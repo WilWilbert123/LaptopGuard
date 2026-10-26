@@ -559,13 +559,14 @@ app.get('/api/events/status', (req, res) => {
  * Static Malware Analysis & Reverse Engineering (Section 17 - Local Only)
  */
 app.post('/api/analyze/file', requireAuth, async (req, res) => {
-  const { filePath, overrideSystemDir } = req.body;
+  const { filePath, overrideSystemDir, confirmSystemDir } = req.body;
   if (!filePath) {
     return res.status(400).json({ success: false, error: 'File path is required.' });
   }
 
-  const result = await analyzer.analyzeFile(filePath, { overrideSystemDir: !!overrideSystemDir });
-  if (result.success) {
+  const allowSysDir = Boolean(overrideSystemDir || confirmSystemDir);
+  const result = await analyzer.analyzeFile(filePath, { overrideSystemDir: allowSysDir });
+  if (result.success && result.data) {
     io.emit('malware:analyzed', {
       reportId: result.reportId,
       fileName: result.data.fileMetadata.fileName,
@@ -573,11 +574,21 @@ app.post('/api/analyze/file', requireAuth, async (req, res) => {
       integrityHash: result.integrityHash
     });
   }
-  res.json(result);
+  res.json({
+    ...result,
+    report: result.data || null
+  });
 });
 
 app.get('/api/analyze/reports', (req, res) => {
-  const reports = db.getMalwareReports(req.query.limit || 50);
+  const rawReports = db.getMalwareReports(req.query.limit || 50);
+  const reports = rawReports.map(r => ({
+    ...r,
+    targetFile: r.file_name || r.file_path || r.targetFile || 'Unknown',
+    fileSizeBytes: r.file_size || r.fileSizeBytes || 0,
+    analyzedAt: r.analyzed_at_utc || r.analyzedAt || '',
+    capabilitiesCount: (r.capabilities && r.capabilities.length) || 0
+  }));
   res.json({ success: true, count: reports.length, reports });
 });
 

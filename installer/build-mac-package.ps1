@@ -39,7 +39,7 @@ foreach ($folder in $IncludeFolders) {
     }
 }
 
-$IncludeFiles = @("package.json", ".env.example", "SETUP_GUIDE_MAC.md")
+$IncludeFiles = @("package.json", ".env.example", "SETUP_GUIDE_MAC.md", "README.md")
 foreach ($file in $IncludeFiles) {
     $src = Join-Path $ProjectRoot $file
     if (Test-Path $src) {

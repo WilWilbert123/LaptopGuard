@@ -2137,13 +2137,14 @@ async function runMalwareAnalysis() {
     });
 
     const data = await res.json();
-    if (data.success && data.report) {
-      state.currentMalwareReport = data.report;
-      renderMalwareReport(data.report);
+    const reportObj = data.report || data.data || data;
+    if (data.success && (data.report || data.data || data.reportId)) {
+      state.currentMalwareReport = reportObj;
+      renderMalwareReport(reportObj);
       showToast('Static analysis completed successfully.', 'success');
       fetchMalwareReports();
     } else {
-      showToast(`Analysis failed: ${data.error}`, 'error');
+      showToast(`Analysis failed: ${data.error || 'Validation error'}`, 'error');
     }
   } catch (e) {
     showToast(`Analysis request failed: ${e.message}`, 'error');
@@ -2295,19 +2296,25 @@ function renderMalwareHistoryTable() {
   elements.malwareHistoryTableBody.innerHTML = list.map(r => {
     let caps = [];
     try {
-      caps = JSON.parse(r.capabilitiesJson || '[]');
+      caps = r.capabilities || JSON.parse(r.capabilitiesJson || r.capabilities_json || '[]');
     } catch (e) { }
 
-    const kb = (r.fileSizeBytes / 1024).toFixed(1);
+    const fileSize = r.fileSizeBytes || r.file_size || 0;
+    const kb = (fileSize / 1024).toFixed(1);
+    const target = r.targetFile || r.file_name || r.file_path || 'Selected File';
+    const sha = r.sha256 || '';
+    const timestamp = r.analyzedAt || r.analyzed_at_utc || '-';
+    const capCount = r.capabilitiesCount || (Array.isArray(caps) ? caps.length : 0);
+
     return `
       <tr>
-        <td class="mono" style="font-size: 0.75rem;"><strong>${escapeHtml(r.targetFile)}</strong></td>
+        <td class="mono" style="font-size: 0.75rem;"><strong>${escapeHtml(target)}</strong></td>
         <td>${kb} KB</td>
-        <td class="mono" style="font-size: 0.7rem;">${escapeHtml((r.sha256 || '').substring(0, 16))}...</td>
-        <td>${caps.length} capabilities</td>
-        <td class="mono">${escapeHtml(r.analyzedAt)}</td>
+        <td class="mono" style="font-size: 0.7rem;">${escapeHtml(sha.substring(0, 16))}...</td>
+        <td>${capCount} capabilities</td>
+        <td class="mono">${escapeHtml(timestamp)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="loadPreviousMalwareReport(${r.id})">View Report</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPreviousMalwareReport('${escapeHtml(String(r.id))}')">View Report</button>
         </td>
       </tr>
     `;
