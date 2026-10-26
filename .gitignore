@@ -21,3 +21,4 @@ Thumbs.db
 # Temporary scratch & tests
 test_out/
 .system_generated/
+dist/

@@ -21,6 +21,7 @@ const responder = require('./responder');
 const identifier = require('./identify');
 const notify = require('./notify');
 const analyzer = require('./analyzer');
+const aiService = require('./ai-service');
 
 const app = express();
 const server = http.createServer(app);
@@ -653,6 +654,62 @@ app.post('/api/incidents/:id/status', requireAuth, (req, res) => {
   db.recordAuditEvent('INCIDENT_STATUS_CHANGE', 'USER', `Updated incident ${req.params.id} to ${status}`, { id: req.params.id, status, notes });
   io.emit('incident:updated', { id: req.params.id, status });
   res.json({ success: true, message: 'Incident updated.' });
+});
+
+/**
+ * =====================================================================
+ * GUARDIAN AI & RAG ASSISTANT ENDPOINTS
+ * =====================================================================
+ */
+app.get('/api/ai/status', async (req, res) => {
+  const status = await aiService.checkOllamaStatus();
+  const context = aiService.buildLiveContext(monitor, db, remoteAccessCollector);
+  res.json({
+    success: true,
+    ollama: status,
+    activeModel: aiService.activeModel || 'Guardian Local Expert RAG',
+    contextSummary: context.summary
+  });
+});
+
+app.get('/api/ai/suggested', (req, res) => {
+  const context = aiService.buildLiveContext(monitor, db, remoteAccessCollector);
+  const questions = aiService.getSuggestedQuestions(context);
+  res.json({
+    success: true,
+    questions
+  });
+});
+
+app.post('/api/ai/chat', async (req, res) => {
+  const { message, history } = req.body;
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ success: false, error: 'A valid message prompt is required.' });
+  }
+
+  try {
+    const result = await aiService.chat(message, monitor, db, remoteAccessCollector, history || []);
+    res.json(result);
+  } catch (err) {
+    console.error('[Guardian AI Server Error]', err);
+    // Fail-safe: Always return complete expert analysis with live telemetry
+    try {
+      const context = aiService.buildLiveContext(monitor, db, remoteAccessCollector);
+      const reply = aiService.generateLocalExpertResponse(message, context);
+      const followUps = aiService.generateFollowUpQuestions(message, reply, context);
+      res.json({
+        success: true,
+        source: 'local_rag',
+        model: 'Guardian Embedded RAG (Fail-Safe)',
+        reply,
+        answer: reply,
+        followUps,
+        contextSummary: context.summary
+      });
+    } catch (fallbackErr) {
+      res.status(500).json({ success: false, error: fallbackErr.message });
+    }
+  }
 });
 
 // -----------------------------------------------------------------------------

@@ -345,6 +345,33 @@ async function executeAll() {
     });
   }
 
+  function httpPost(path, data) {
+    return new Promise((resolve, reject) => {
+      const payload = JSON.stringify(data || {});
+      const req = http.request({
+        hostname: '127.0.0.1',
+        port: TEST_PORT,
+        path,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload)
+        }
+      }, (res) => {
+        let body = '';
+        res.on('data', d => body += d);
+        res.on('end', () => {
+          let parsed = {};
+          try { parsed = JSON.parse(body); } catch(e) { parsed = { raw: body }; }
+          resolve({ status: res.statusCode, body: parsed });
+        });
+      });
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    });
+  }
+
   await runAsyncTest('GET /api/status returns health and security headers', async () => {
     const res = await httpGet('/api/status');
     assert.strictEqual(res.status, 200);
@@ -408,6 +435,31 @@ async function executeAll() {
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.body.success, true);
     assert.ok(res.body.channels);
+  });
+
+  await runAsyncTest('GET /api/ai/status returns active model and real telemetry context', async () => {
+    const res = await httpGet('/api/ai/status');
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.ok(res.body.activeModel);
+    assert.ok(res.body.contextSummary);
+  });
+
+  await runAsyncTest('GET /api/ai/suggested returns list of contextual questions', async () => {
+    const res = await httpGet('/api/ai/suggested');
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.ok(Array.isArray(res.body.questions));
+    assert.ok(res.body.questions.length >= 3);
+  });
+
+  await runAsyncTest('POST /api/ai/chat returns grounded response with 4-6 follow-up questions', async () => {
+    const res = await httpPost('/api/ai/chat', { message: 'Is my laptop safe right now?' });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.ok(res.body.answer || res.body.reply);
+    assert.ok(Array.isArray(res.body.followUps));
+    assert.ok(res.body.followUps.length >= 4 && res.body.followUps.length <= 6);
   });
 
   // -------------------------------------------------------------------
