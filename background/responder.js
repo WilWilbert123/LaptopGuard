@@ -115,12 +115,21 @@ class IncidentResponder {
         const ruleIn = `LaptopGuard_Block_${ip}_IN`;
         const ruleOut = `LaptopGuard_Block_${ip}_OUT`;
 
-        // Execute via PowerShell host
-        const script = `
-          New-NetFirewallRule -DisplayName "${ruleIn}" -Direction Inbound -Action Block -RemoteAddress "${ip}" -ErrorAction Stop
-          New-NetFirewallRule -DisplayName "${ruleOut}" -Direction Outbound -Action Block -RemoteAddress "${ip}" -ErrorAction Stop
-        `;
-        await psHost.execute(script, { timeoutMs: 8000, asJson: false });
+        let script = '';
+        if (process.platform === 'darwin') {
+          script = `sudo pfctl -a guardian -t guardian_block -T add ${ip}`;
+          try {
+            const { exec } = require('child_process');
+            await new Promise(r => exec(script, { timeout: 3000 }, () => r()));
+          } catch (e) {}
+        } else {
+          // Execute via PowerShell host
+          script = `
+            New-NetFirewallRule -DisplayName "${ruleIn}" -Direction Inbound -Action Block -RemoteAddress "${ip}" -ErrorAction Stop
+            New-NetFirewallRule -DisplayName "${ruleOut}" -Direction Outbound -Action Block -RemoteAddress "${ip}" -ErrorAction Stop
+          `;
+          await psHost.execute(script, { timeoutMs: 8000, asJson: false });
+        }
 
         db.recordFirewallRule({
           ruleName: ruleIn,
