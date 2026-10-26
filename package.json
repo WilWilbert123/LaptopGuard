@@ -1,7 +1,7 @@
 {
-  "name": "my-laptop-guard",
+  "name": "guardian-laptop-defense",
   "version": "1.0.0",
-  "description": "Lightweight personal Windows laptop security background worker and live dashboard",
+  "description": "Guardian - Lightweight personal Windows laptop security background worker and live dashboard",
   "main": "background/server.js",
   "scripts": {
     "start": "node background/server.js",
