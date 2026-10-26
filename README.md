@@ -23,14 +23,17 @@
 ## Table of Contents
 
 1. [Overview](#1-overview)
-2. [Step-by-Step Installation Guide for Windows](#2-step-by-step-installation-guide-for-windows)
-3. [Step-by-Step Installation Guide for macOS (MacBook)](#3-step-by-step-installation-guide-for-macos-macbook)
-4. [Native Standalone Application Window Mode](#4-native-standalone-application-window-mode)
-5. [Step-by-Step Setup Guide for Guardian AI](#5-step-by-step-setup-guide-for-guardian-ai)
-6. [Manual Developer Setup and Test Verification](#6-manual-developer-setup-and-test-verification)
-7. [Core Security and Telemetry Capabilities](#7-core-security-and-telemetry-capabilities)
-8. [Step-by-Step Uninstallation Guide](#8-step-by-step-uninstallation-guide)
-9. [Privacy Guarantee and Safety Boundaries](#9-privacy-guarantee-and-safety-boundaries)
+2. [Technology Stack](#2-technology-stack)
+3. [Step-by-Step Installation Guide for Windows](#3-step-by-step-installation-guide-for-windows)
+4. [Step-by-Step Installation Guide for macOS (MacBook)](#4-step-by-step-installation-guide-for-macos-macbook)
+5. [Native Standalone Application Window Mode](#5-native-standalone-application-window-mode)
+6. [Step-by-Step Setup Guide for Guardian AI](#6-step-by-step-setup-guide-for-guardian-ai)
+7. [Manual Developer Setup and Test Verification](#7-manual-developer-setup-and-test-verification)
+8. [Core Security and Telemetry Capabilities](#8-core-security-and-telemetry-capabilities)
+9. [Step-by-Step Uninstallation Guide](#9-step-by-step-uninstallation-guide)
+10. [Privacy Guarantee and Safety Boundaries](#10-privacy-guarantee-and-safety-boundaries)
+11. [Summary of Essential Commands](#11-summary-of-essential-commands)
+12. [License](#12-license)
 
 ---
 
@@ -51,7 +54,26 @@ All telemetry remains strictly local to your machine. Guardian binds exclusively
 
 ---
 
-## 2. Step-by-Step Installation Guide for Windows
+## 2. Technology Stack
+
+- **Node.js**: Backend runtime & daemon
+- **Express.js**: REST API & static file serving
+- **Socket.IO**: Real-time WebSocket telemetry streaming
+- **SQLite3**: Local database with WAL mode
+- **HTML5**: Cockpit layout & modal UI
+- **Vanilla CSS3**: Custom design system, dark/light themes, glassmorphism
+- **Vanilla JavaScript ES6+**: Frontend client logic & real-time DOM updates
+- **Chromium App Mode**: Standalone desktop window via Edge/Chrome/Brave `--app` flag
+- **Web App Manifest**: `manifest.json` for standalone PWA configuration
+- **Ollama**: Local LLM engine for AI queries
+- **Local RAG Engine**: Offline knowledge retrieval grounded in live telemetry
+- **PowerShell**: Windows persistent host, Event Log, Defender, and Firewall integration
+- **macOS Commands**: `lsof`, `ps`, `pfctl`, `spctl`, `csrutil`, `launchd`
+- **Crypto & Buffer APIs**: Node.js native SHA-256 evidence hashing and PE entropy analysis
+
+---
+
+## 3. Step-by-Step Installation Guide for Windows
 
 Follow these steps to install and run Guardian on Windows 10 or Windows 11 (64-bit).
 
@@ -99,7 +121,7 @@ You can launch the Guardian cockpit using any of the following methods:
 
 ---
 
-## 3. Step-by-Step Installation Guide for macOS (MacBook)
+## 4. Step-by-Step Installation Guide for macOS (MacBook)
 
 Follow these steps to install and run Guardian on macOS (Apple Silicon M1/M2/M3/M4 or Intel).
 
@@ -149,7 +171,7 @@ What the macOS installer automatically performs:
 
 ---
 
-## 4. Native Standalone Application Window Mode
+## 5. Native Standalone Application Window Mode
 
 Guardian is designed to run as an independent desktop application rather than a regular browser tab.
 
@@ -176,7 +198,7 @@ Guardian is designed to run as an independent desktop application rather than a 
 
 ---
 
-## 5. Step-by-Step Setup Guide for Guardian AI
+## 6. Step-by-Step Setup Guide for Guardian AI
 
 Guardian features an integrated, floating AI Security Assistant that has real-time context of your active connections, listening ports, remote administration tools, hardware sensors, and antivirus posture.
 
@@ -217,7 +239,7 @@ If Ollama is stopped, offline, or busy, Guardian automatically falls back within
 
 ---
 
-## 6. Manual Developer Setup and Test Verification
+## 7. Manual Developer Setup and Test Verification
 
 For developers who wish to run Guardian directly from the terminal without background tasks or installers:
 
@@ -265,7 +287,7 @@ The server will bind to `http://127.0.0.1:3000`.
 
 ---
 
-## 7. Core Security and Telemetry Capabilities
+## 8. Core Security and Telemetry Capabilities
 
 | Module | What It Monitors | Detection Criteria |
 | :--- | :--- | :--- |
@@ -280,7 +302,7 @@ The server will bind to `http://127.0.0.1:3000`.
 
 ---
 
-## 8. Step-by-Step Uninstallation Guide
+## 9. Step-by-Step Uninstallation Guide
 
 To completely remove Guardian and its registered services from your machine:
 
@@ -311,7 +333,7 @@ To completely remove Guardian and its registered services from your machine:
 
 ---
 
-## 9. Privacy Guarantee and Safety Boundaries
+## 10. Privacy Guarantee and Safety Boundaries
 
 Guardian is built on non-negotiable personal privacy and safety principles:
 
@@ -323,7 +345,7 @@ Guardian is built on non-negotiable personal privacy and safety principles:
 
 ---
 
-## 10. Summary of Essential Commands
+## 11. Summary of Essential Commands
 
 | Action | Windows Command | macOS Command |
 | :--- | :--- | :--- |
@@ -336,6 +358,6 @@ Guardian is built on non-negotiable personal privacy and safety principles:
 
 ---
 
-## 11. License
+## 12. License
 
 Personal Use License. Developed for personal laptop security monitoring and telemetry defense.
