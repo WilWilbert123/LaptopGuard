@@ -309,6 +309,12 @@ class WindowsEventTailer {
         if (ev.RecordId > maxRecord) maxRecord = ev.RecordId;
 
         if (ev.Id === 21) {
+          const msg = ev.Message || '';
+          // Ignore local console logons (Event 21 with Source Network Address: LOCAL is standard physical laptop login)
+          if (msg.includes('Source Network Address: LOCAL') || msg.includes('Address: LOCAL')) {
+            continue;
+          }
+
           db.recordFinding({
             ruleId: 'RULE_RDP_SESSION_LOGON',
             title: 'Terminal Services Remote Session Logon',
