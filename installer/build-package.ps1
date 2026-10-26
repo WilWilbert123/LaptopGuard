@@ -19,8 +19,12 @@ $ZipFile = Join-Path $DistDir "Guardian-v1.0.0-Windows.zip"
 
 # 1. Clean previous build artifacts
 Write-Host "[1/4] Preparing output directory..." -ForegroundColor White
-if (Test-Path $StagingDir) { Remove-Item -Path $StagingDir -Recurse -Force }
-if (Test-Path $ZipFile) { Remove-Item -Path $ZipFile -Force }
+if (Test-Path $StagingDir) {
+    try { Remove-Item -Path $StagingDir -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+}
+if (Test-Path $ZipFile) {
+    try { Remove-Item -Path $ZipFile -Force -ErrorAction SilentlyContinue } catch {}
+}
 New-Item -ItemType Directory -Path $StagingDir -Force | Out-Null
 
 # 2. Copy production assets
@@ -55,8 +59,16 @@ New-Item -ItemType Directory -Path (Join-Path $StagingDir "data") -Force | Out-N
 # 3. Compile Inno Setup installer if iscc.exe is installed
 Write-Host "[3/4] Checking for Inno Setup compiler..." -ForegroundColor White
 $Iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
-if (-not $Iscc -and (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe")) {
-    $Iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+$CandidatePaths = @(
+    "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+    "C:\Program Files\Inno Setup 6\ISCC.exe",
+    "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe"
+)
+foreach ($p in $CandidatePaths) {
+    if (-not $Iscc -and (Test-Path $p)) {
+        $Iscc = $p
+        break
+    }
 }
 
 if ($Iscc) {
