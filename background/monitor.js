@@ -225,6 +225,7 @@ class LaptopMonitor {
           processPath: processPath,
           direction: direction,
           isExternal: !isLoopback && !isPrivate && remote.ip !== '*',
+          isGuardInternal: (pid === process.pid || (psHost && psHost.pid && pid === psHost.pid)),
           firstSeen: firstSeen,
           lastSeen: now,
           isNew: isNew,

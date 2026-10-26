@@ -90,6 +90,36 @@ class SecurityDetector {
   }
 
   /**
+   * Helper to check if an IP belongs to known cloud / CDN providers (Cloudflare, Microsoft, Google, AWS)
+   */
+  isKnownCloudOrCdnIp(ip) {
+    if (!ip || typeof ip !== 'string') return false;
+    // Cloudflare Anycast IPv4 ranges
+    if (ip.startsWith('104.')) {
+      const second = parseInt(ip.split('.')[1], 10);
+      if (second >= 16 && second <= 31) return true;
+    }
+    if (ip.startsWith('172.')) {
+      const second = parseInt(ip.split('.')[1], 10);
+      if (second >= 64 && second <= 71) return true;
+    }
+    if (ip.startsWith('198.41.')) {
+      const third = parseInt(ip.split('.')[2], 10);
+      if (third >= 128 && third <= 255) return true;
+    }
+    if (ip.startsWith('162.158.') || ip.startsWith('162.159.')) return true;
+
+    // Microsoft Online Services / Azure Anycast & Login ranges (login.microsoftonline.com, Windows Update, Telemetry)
+    if (ip.startsWith('40.126.') || ip.startsWith('40.76.') || ip.startsWith('40.79.') || ip.startsWith('40.83.') || ip.startsWith('40.112.')) return true;
+    if (ip.startsWith('20.190.') || ip.startsWith('13.107.') || ip.startsWith('52.107.') || ip.startsWith('52.225.') || ip.startsWith('52.96.')) return true;
+
+    // Google Cloud / CDN
+    if (ip.startsWith('142.250.') || ip.startsWith('172.217.') || ip.startsWith('34.') || ip.startsWith('35.')) return true;
+
+    return false;
+  }
+
+  /**
    * Checks if an executable path is located in suspicious or user-writable temp areas
    */
   isSuspiciousPath(exePath) {
@@ -153,7 +183,12 @@ class SecurityDetector {
     }
 
     // Rule 2: Living-off-the-Land Binary (LOLBin) establishing external connection
-    if (LOLBINS.has(procNameLower) && !isPrivate && conn.state === 'ESTABLISHED') {
+    const isGuardProc = conn.isGuardInternal || (conn.pid && conn.pid === process.pid);
+    const isKnownCloud = this.isKnownCloudOrCdnIp(remoteIp);
+    const isStandardWeb = (remotePort === 443 || remotePort === 80);
+    const isTrustedAdminTraffic = isKnownCloud && isStandardWeb && (procNameLower === 'powershell.exe' || procNameLower === 'pwsh.exe');
+
+    if (LOLBINS.has(procNameLower) && !isPrivate && !isGuardProc && !isTrustedAdminTraffic && conn.state === 'ESTABLISHED') {
       findings.push({
         ruleId: 'RULE_LOLBIN_NET',
         title: `Unusual Network Activity from Script/System Tool (${conn.processName})`,

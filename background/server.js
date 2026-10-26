@@ -625,8 +625,9 @@ app.get('/api/suspicious-outbound', (req, res) => {
   const dbProfiles = db.getSuspiciousOutboundProfiles(req.query.limit || 50);
   res.json({
     success: true,
-    count: active.length > 0 ? active.length : dbProfiles.length,
-    profiles: active.length > 0 ? active : dbProfiles
+    count: active.length,
+    profiles: active,
+    history: dbProfiles
   });
 });
 

@@ -325,8 +325,43 @@ class RemoteAccessCollector {
     const shells = [];
     const profiles = [];
 
+/**
+ * Checks if an IP belongs to well-known CDN or Cloud provider infrastructure (Cloudflare, Microsoft, Google, AWS, GitHub)
+ */
+function isKnownCloudOrCdnIp(ip) {
+  if (!ip || typeof ip !== 'string') return false;
+  // Cloudflare Anycast IPv4 ranges
+  if (ip.startsWith('104.')) {
+    const second = parseInt(ip.split('.')[1], 10);
+    if (second >= 16 && second <= 31) return true;
+  }
+  if (ip.startsWith('172.')) {
+    const second = parseInt(ip.split('.')[1], 10);
+    if (second >= 64 && second <= 71) return true;
+  }
+  if (ip.startsWith('198.41.')) {
+    const third = parseInt(ip.split('.')[2], 10);
+    if (third >= 128 && third <= 255) return true;
+  }
+  if (ip.startsWith('162.158.') || ip.startsWith('162.159.')) return true;
+
+  // Microsoft Online Services / Azure Anycast & Login ranges (login.microsoftonline.com, Windows Update, Telemetry)
+  if (ip.startsWith('40.126.') || ip.startsWith('40.76.') || ip.startsWith('40.79.') || ip.startsWith('40.83.') || ip.startsWith('40.112.')) return true;
+  if (ip.startsWith('20.190.') || ip.startsWith('13.107.') || ip.startsWith('52.107.') || ip.startsWith('52.225.') || ip.startsWith('52.96.')) return true;
+
+  // Google Cloud / CDN
+  if (ip.startsWith('142.250.') || ip.startsWith('172.217.') || ip.startsWith('34.') || ip.startsWith('35.')) return true;
+
+  return false;
+}
+
     for (const conn of activeConnections) {
       if (conn.isExternal && conn.state === 'ESTABLISHED') {
+        // Exclude LaptopGuard's own process and persistent PowerShell child host
+        if (conn.pid === process.pid || (psHost && psHost.pid && conn.pid === psHost.pid)) {
+          continue;
+        }
+
         const name = (conn.processName || '').toLowerCase();
         if (INTERPRETERS.has(name)) {
           // Track timestamps for beaconing calculation
@@ -355,6 +390,12 @@ class RemoteAccessCollector {
           const isRuntime = (name === 'node.exe' || name === 'python.exe');
           const isStandardWebPort = (Number(conn.remotePort) === 443 || Number(conn.remotePort) === 80);
           if (isRuntime && isStandardWebPort && !isSuspiciousParent && !isObfuscated && !isCommonPort) {
+            continue;
+          }
+
+          // Allow legitimate PowerShell / shell traffic on standard HTTPS to trusted Cloud/CDN endpoints (Windows updates, Microsoft login, npm/github)
+          const isKnownCloud = isKnownCloudOrCdnIp(conn.remoteIp);
+          if ((name === 'powershell.exe' || name === 'pwsh.exe') && isStandardWebPort && isKnownCloud && !isSuspiciousParent && !isObfuscated && !isCommonPort) {
             continue;
           }
 
@@ -390,7 +431,11 @@ class RemoteAccessCollector {
             score += 20;
           }
 
-          const confidence = score >= 60 ? 'HIGH' : (score >= 40 ? 'MEDIUM' : 'LOW');
+          let confidence = score >= 60 ? 'HIGH' : (score >= 40 ? 'MEDIUM' : 'LOW');
+          // If port is standard web (443/80) and no malicious parent, obfuscation, or backdoor port was found, cap at MEDIUM
+          if (isStandardWebPort && !isSuspiciousParent && !isObfuscated && !isCommonPort && confidence === 'HIGH') {
+            confidence = 'MEDIUM';
+          }
           const plainEnglish = `A ${conn.processName} process on your laptop opened an outbound connection to ${conn.remoteIp}:${conn.remotePort} (no DNS name). This matches reverse-shell indicators. Confidence: ${confidence.toLowerCase()}. Evidence: ${indicators.join('; ')}.`;
 
           const profileId = `outbound_${conn.pid}_${String(conn.remoteIp).replace(/[^a-zA-Z0-9]/g, '_')}_${conn.remotePort}`;
@@ -431,8 +476,8 @@ class RemoteAccessCollector {
           if (shouldPersist && targetDb) {
             targetDb.upsertSuspiciousOutbound(outboundProfile);
 
-            // Correlate into incidents table if confidence is HIGH or MEDIUM
-            if (confidence === 'HIGH' || confidence === 'MEDIUM') {
+            // Correlate into incidents table if confidence is HIGH or concrete attack signals exist
+            if (confidence === 'HIGH' || isSuspiciousParent || isObfuscated || isCommonPort) {
               const incId = `inc_${String(conn.remoteIp).replace(/[^a-zA-Z0-9]/g, '_')}`;
               targetDb.recordIncident({
                 id: incId,

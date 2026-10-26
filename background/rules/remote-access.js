@@ -249,8 +249,13 @@ function calculateRemoteRiskScore(state = {}) {
 
   const activeTool = detectedTools.find(t => t.hasActiveConnection);
   if (activeTool) {
-    score += 35;
-    factors.push({ name: `Active Remote Control Connection (${activeTool.name})`, weight: 35, severity: 'HIGH' });
+    if (activeTool.category === 'Port Forwarding / Reverse Tunnel') {
+      score += 15;
+      factors.push({ name: `Active Reverse Tunnel (${activeTool.name})`, weight: 15, severity: 'LOW' });
+    } else {
+      score += 35;
+      factors.push({ name: `Active Remote Control Connection (${activeTool.name})`, weight: 35, severity: 'HIGH' });
+    }
   } else if (detectedTools.some(t => t.isRunning)) {
     score += 15;
     factors.push({ name: 'Remote Control Tool Running in Background', weight: 15, severity: 'MEDIUM' });
@@ -281,14 +286,31 @@ function calculateRemoteRiskScore(state = {}) {
     severity: 'SAFE'
   };
 
-  if (activeSessions.some(s => s.logonType === 10 || s.isRemoteInteractive) || activeTool) {
-    const who = activeTool ? activeTool.name : (activeSessions[0].username || 'Remote User');
-    const from = activeTool ? (activeTool.remoteIp || 'Remote Client') : (activeSessions[0].clientIp || activeSessions[0].clientName || 'Network Client');
+  const hasInteractiveSession = activeSessions.some(s => s.logonType === 10 || s.isRemoteInteractive);
+
+  if (hasInteractiveSession) {
+    const s = activeSessions.find(s => s.logonType === 10 || s.isRemoteInteractive) || activeSessions[0];
+    const who = s.username || 'Remote User';
+    const from = s.clientIp || s.clientName || 'Network Client';
     statusBanner = {
       code: 'SESSION_ACTIVE',
-      text: `Remote session ACTIVE: someone may be connected (${who} from ${from})`,
+      text: `Remote desktop session ACTIVE: user logged in (${who} from ${from})`,
       severity: 'CRITICAL'
     };
+  } else if (activeTool) {
+    if (activeTool.category === 'Port Forwarding / Reverse Tunnel') {
+      statusBanner = {
+        code: 'TUNNEL_ACTIVE',
+        text: `Network Tunnel active: ${activeTool.name} connected to edge (${activeTool.remoteIp || 'Cloudflare Edge'})`,
+        severity: 'INFO'
+      };
+    } else {
+      statusBanner = {
+        code: 'TOOL_ACTIVE',
+        text: `Remote control software active: ${activeTool.name} connected to ${activeTool.remoteIp || 'remote client'}`,
+        severity: 'HIGH'
+      };
+    }
   } else if (reverseShells.length > 0) {
     statusBanner = {
       code: 'SUSPICIOUS_INDICATORS',
@@ -299,7 +321,7 @@ function calculateRemoteRiskScore(state = {}) {
     const tool = detectedTools.find(t => t.isRunning);
     statusBanner = {
       code: 'TOOL_IDLE',
-      text: `Remote access tool is installed but idle (${tool.name})`,
+      text: `Remote tool running in background (${tool.name})`,
       severity: 'WARNING'
     };
   }
