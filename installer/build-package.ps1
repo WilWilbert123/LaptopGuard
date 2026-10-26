@@ -44,9 +44,10 @@ foreach ($file in $IncludeFiles) {
     }
 }
 
-# Put install.bat and uninstall.bat in the root of the package for easy double-clicking
+# Put install.bat, uninstall.bat, and Launch-Guardian-App.bat in the root of the package for easy double-clicking
 Copy-Item -Path (Join-Path $ProjectRoot "installer\install.bat") -Destination (Join-Path $StagingDir "Install-Guardian.bat") -Force
 Copy-Item -Path (Join-Path $ProjectRoot "installer\uninstall.bat") -Destination (Join-Path $StagingDir "Uninstall-Guardian.bat") -Force
+Copy-Item -Path (Join-Path $ProjectRoot "installer\Guardian.bat") -Destination (Join-Path $StagingDir "Launch-Guardian-App.bat") -Force
 
 # Create empty data folder
 New-Item -ItemType Directory -Path (Join-Path $StagingDir "data") -Force | Out-Null
