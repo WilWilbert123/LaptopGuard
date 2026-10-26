@@ -20,6 +20,62 @@ class SecurityPostureEvaluator {
   async evaluate() {
     const start = Date.now();
     try {
+      if (process.platform === 'darwin') {
+        const { exec } = require('child_process');
+        let sipActive = true;
+        let gatekeeperActive = true;
+        let firewallActive = true;
+
+        try {
+          const sip = await new Promise(r => exec('csrutil status', { timeout: 2000 }, (e, o) => r(o || '')));
+          sipActive = sip.toLowerCase().includes('enabled');
+        } catch (e) {}
+
+        try {
+          const spctl = await new Promise(r => exec('spctl --status', { timeout: 2000 }, (e, o) => r(o || '')));
+          gatekeeperActive = spctl.toLowerCase().includes('assessments enabled');
+        } catch (e) {}
+
+        try {
+          const fw = await new Promise(r => exec('/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate', { timeout: 2000 }, (e, o) => r(o || '')));
+          firewallActive = fw.toLowerCase().includes('enabled');
+        } catch (e) {}
+
+        let score = 100;
+        const deductions = [];
+
+        if (!sipActive) {
+          score -= 25;
+          deductions.push({ rule: 'SIP_DISABLED', penalty: 25, title: 'System Integrity Protection (SIP) is disabled' });
+        }
+        if (!gatekeeperActive) {
+          score -= 20;
+          deductions.push({ rule: 'GATEKEEPER_DISABLED', penalty: 20, title: 'Gatekeeper application assessments disabled' });
+        }
+        if (!firewallActive) {
+          score -= 15;
+          deductions.push({ rule: 'FIREWALL_DISABLED', penalty: 15, title: 'macOS Application Firewall is turned off' });
+        }
+
+        score = Math.max(0, Math.min(100, score));
+        let grade = 'A';
+        if (score < 60) grade = 'F';
+        else if (score < 70) grade = 'D';
+        else if (score < 80) grade = 'C';
+        else if (score < 90) grade = 'B';
+
+        const postureRecord = {
+          score,
+          grade,
+          deductions,
+          rawState: { sipActive, gatekeeperActive, firewallActive }
+        };
+
+        db.recordPosture(postureRecord);
+        this.latestEvaluation = postureRecord;
+        return postureRecord;
+      }
+
       const script = `
         $uac = Get-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -ErrorAction SilentlyContinue
         $smb1 = Get-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name SMB1 -ErrorAction SilentlyContinue

@@ -77,6 +77,35 @@ class RemoteAccessCollector {
    */
   async collectLogonSessions() {
     try {
+      if (process.platform === 'darwin') {
+        const { exec } = require('child_process');
+        const stdout = await new Promise(r => exec('who', { timeout: 3000 }, (e, o) => r(o || '')));
+        const lines = stdout.split('\n');
+        const sessions = [];
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          const parts = trimmed.split(/\s+/);
+          if (parts.length >= 2) {
+            const user = parts[0];
+            const tty = parts[1];
+            const isNetwork = trimmed.includes('(');
+            const remoteHost = isNetwork ? (trimmed.match(/\(([^)]+)\)/) || [])[1] : null;
+            sessions.push({
+              id: tty,
+              sessionId: tty,
+              username: user,
+              logonType: isNetwork ? 10 : 2,
+              clientName: remoteHost || 'Local Terminal',
+              clientAddress: remoteHost,
+              state: 'Active',
+              startTime: new Date().toISOString()
+            });
+          }
+        }
+        return sessions;
+      }
+
       const script = `
         $users = @{}
         Get-CimInstance Win32_LoggedOnUser -ErrorAction SilentlyContinue | ForEach-Object {
@@ -170,6 +199,8 @@ class RemoteAccessCollector {
       webcam: { inUse: false, appName: null, appPath: null, startTime: null },
       microphone: { inUse: false, appName: null, appPath: null, startTime: null }
     };
+
+    if (process.platform === 'darwin') return sensors;
 
     try {
       const script = `

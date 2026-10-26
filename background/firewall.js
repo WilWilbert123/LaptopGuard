@@ -16,6 +16,15 @@ class FirewallManager {
    * Checks whether the current Node process is running with Windows Administrator privileges
    */
   async checkAdminPrivileges() {
+    if (process.platform === 'darwin' || process.platform === 'linux') {
+      const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
+      return {
+        isAdmin: isRoot,
+        method: isRoot ? 'root (UID 0)' : 'standard user',
+        reason: isRoot ? null : 'Process is running in standard user mode without sudo elevation.'
+      };
+    }
+
     return new Promise((resolve) => {
       // 'net session' succeeds (code 0) only under elevated Administrator
       execFile('net.exe', ['session'], { timeout: 4000 }, (err) => {

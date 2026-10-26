@@ -30,6 +30,7 @@ class PersistentPowerShellHost {
    * Initializes or restarts the persistent PowerShell child process
    */
   start() {
+    if (process.platform !== 'win32') return;
     if (this.child && !this.child.killed) return;
     this.isStopping = false;
 
@@ -218,6 +219,10 @@ Write-Output "__PS_HOST_END_${task.id}__"
    * Returns a Promise resolving to parsed JSON or string output.
    */
   execute(script, options = {}) {
+    if (process.platform !== 'win32') {
+      return Promise.resolve(options.asJson !== false ? {} : '');
+    }
+
     if (!script || typeof script !== 'string') {
       return Promise.reject(new Error('Invalid PowerShell script provided'));
     }
