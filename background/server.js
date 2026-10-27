@@ -699,21 +699,31 @@ app.post('/api/ai/chat', async (req, res) => {
   }
 
   try {
-    const result = await aiService.chat(message, monitor, db, remoteAccessCollector, history || []);
+    const services = {
+      monitor,
+      db,
+      remoteAccessCollector,
+      firewall,
+      responder,
+      postureEvaluator,
+      io
+    };
+    const result = await aiService.chat(message, services, history || []);
     res.json(result);
   } catch (err) {
     console.error('[Guardian AI Server Error]', err);
-    // Fail-safe: Always return complete expert analysis with live telemetry
     try {
-      const context = aiService.buildLiveContext(monitor, db, remoteAccessCollector);
-      const reply = aiService.generateLocalExpertResponse(message, context);
-      const followUps = aiService.generateFollowUpQuestions(message, reply, context);
+      const services = { monitor, db, remoteAccessCollector, firewall, responder, postureEvaluator, io };
+      const context = aiService.buildLiveContext(services);
+      const reply = await aiService.generateDeterministicExpertResponse(message, context, services);
+      const followUps = aiService.generateFollowUpQuestions(message, reply.reply || reply, context);
       res.json({
         success: true,
         source: 'local_rag',
-        model: 'Guardian Embedded RAG (Fail-Safe)',
-        reply,
-        answer: reply,
+        model: 'Guardian Active Agent RAG (Fail-Safe)',
+        reply: reply.reply || reply,
+        answer: reply.reply || reply,
+        actions: reply.actions || [],
         followUps,
         contextSummary: context.summary
       });

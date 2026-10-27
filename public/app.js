@@ -2933,12 +2933,21 @@ function removeAiTypingIndicator() {
   if (el) el.remove();
 }
 
-function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI') {
+function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI', actions = []) {
   const container = document.getElementById('aiMessagesContainer');
   if (!container) return;
 
   const msgDiv = document.createElement('div');
   msgDiv.className = 'ai-message ai-message-assistant';
+
+  let actionsHtml = '';
+  if (actions && actions.length > 0) {
+    actionsHtml = `
+      <div class="ai-actions-wrapper" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+        ${actions.map(a => `<button class="ai-action-btn" data-prompt="${escapeHtmlAttr(a.prompt || a.label)}" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 1px solid rgba(56,189,248,0.4); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s;">${escapeHtml(a.label)}</button>`).join('')}
+      </div>
+    `;
+  }
 
   let followUpsHtml = '';
   if (followUps && followUps.length > 0) {
@@ -2966,9 +2975,20 @@ function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI') 
       <div class="ai-bubble-content">
         ${formatAiMarkdown(answer)}
       </div>
+      ${actionsHtml}
       ${followUpsHtml}
     </div>
   `;
+
+  // Attach click listeners to action buttons
+  msgDiv.querySelectorAll('.ai-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prompt = btn.getAttribute('data-prompt');
+      if (prompt) {
+        sendGuardianAiMessage(prompt);
+      }
+    });
+  });
 
   // Attach click listeners to follow-up chips
   msgDiv.querySelectorAll('.ai-followup-chip').forEach(btn => {
@@ -3018,8 +3038,8 @@ async function sendGuardianAiMessage(question) {
 
     const answerText = data.answer || data.reply || (data.success && data.message);
     if (answerText) {
-      const sourceName = data.source === 'ollama' ? 'Guardian AI (Local Qwen)' : 'Guardian AI (Security Analyst)';
-      appendAssistantMessage(answerText, data.followUps || [], sourceName);
+      const sourceName = data.source === 'ollama' ? 'Guardian AI (Local Qwen)' : (data.source === 'agent_executor' ? 'Guardian Action Agent' : 'Guardian AI (Security Analyst)');
+      appendAssistantMessage(answerText, data.followUps || [], sourceName, data.actions || []);
       guardianAiState.conversationHistory.push({ role: 'assistant', content: answerText });
     } else {
       const liveConns = state.summary ? state.summary.activeConnections : '240+';
