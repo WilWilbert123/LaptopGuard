@@ -62,7 +62,19 @@ If WScript.Arguments.Count = 0 Or (WScript.Arguments.Count > 0 And WScript.Argum
     
     If BrowserExe <> "" Then
         ' Standalone Native Application Window Mode (no address bar, no tabs, native desktop frame)
-        AppCmd = """" & BrowserExe & """ --app=http://127.0.0.1:3000 --app-id=GuardianSecurity --window-size=1360,860"
+        Dim UserDataDir
+        UserDataDir = WshShell.ExpandEnvironmentStrings("%LOCALAPPDATA%\Guardian\app-data")
+        If Not FSO.FolderExists(WshShell.ExpandEnvironmentStrings("%LOCALAPPDATA%\Guardian")) Then
+            On Error Resume Next
+            FSO.CreateFolder(WshShell.ExpandEnvironmentStrings("%LOCALAPPDATA%\Guardian"))
+            On Error GoTo 0
+        End If
+        If Not FSO.FolderExists(UserDataDir) Then
+            On Error Resume Next
+            FSO.CreateFolder(UserDataDir)
+            On Error GoTo 0
+        End If
+        AppCmd = """" & BrowserExe & """ --app=http://127.0.0.1:3000 --user-data-dir=""" & UserDataDir & """ --window-size=1360,860 --no-first-run --no-default-browser-check"
         WshShell.Run AppCmd, 1, False
         AppLaunched = True
     End If

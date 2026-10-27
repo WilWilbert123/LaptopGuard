@@ -2137,13 +2137,14 @@ async function runMalwareAnalysis() {
     });
 
     const data = await res.json();
-    if (data.success && data.report) {
-      state.currentMalwareReport = data.report;
-      renderMalwareReport(data.report);
+    const reportObj = data.report || data.data || data;
+    if (data.success && (data.report || data.data || data.reportId)) {
+      state.currentMalwareReport = reportObj;
+      renderMalwareReport(reportObj);
       showToast('Static analysis completed successfully.', 'success');
       fetchMalwareReports();
     } else {
-      showToast(`Analysis failed: ${data.error}`, 'error');
+      showToast(`Analysis failed: ${data.error || 'Validation error'}`, 'error');
     }
   } catch (e) {
     showToast(`Analysis request failed: ${e.message}`, 'error');
@@ -2295,19 +2296,25 @@ function renderMalwareHistoryTable() {
   elements.malwareHistoryTableBody.innerHTML = list.map(r => {
     let caps = [];
     try {
-      caps = JSON.parse(r.capabilitiesJson || '[]');
+      caps = r.capabilities || JSON.parse(r.capabilitiesJson || r.capabilities_json || '[]');
     } catch (e) { }
 
-    const kb = (r.fileSizeBytes / 1024).toFixed(1);
+    const fileSize = r.fileSizeBytes || r.file_size || 0;
+    const kb = (fileSize / 1024).toFixed(1);
+    const target = r.targetFile || r.file_name || r.file_path || 'Selected File';
+    const sha = r.sha256 || '';
+    const timestamp = r.analyzedAt || r.analyzed_at_utc || '-';
+    const capCount = r.capabilitiesCount || (Array.isArray(caps) ? caps.length : 0);
+
     return `
       <tr>
-        <td class="mono" style="font-size: 0.75rem;"><strong>${escapeHtml(r.targetFile)}</strong></td>
+        <td class="mono" style="font-size: 0.75rem;"><strong>${escapeHtml(target)}</strong></td>
         <td>${kb} KB</td>
-        <td class="mono" style="font-size: 0.7rem;">${escapeHtml((r.sha256 || '').substring(0, 16))}...</td>
-        <td>${caps.length} capabilities</td>
-        <td class="mono">${escapeHtml(r.analyzedAt)}</td>
+        <td class="mono" style="font-size: 0.7rem;">${escapeHtml(sha.substring(0, 16))}...</td>
+        <td>${capCount} capabilities</td>
+        <td class="mono">${escapeHtml(timestamp)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="loadPreviousMalwareReport(${r.id})">View Report</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPreviousMalwareReport('${escapeHtml(String(r.id))}')">View Report</button>
         </td>
       </tr>
     `;
@@ -2926,12 +2933,21 @@ function removeAiTypingIndicator() {
   if (el) el.remove();
 }
 
-function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI') {
+function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI', actions = []) {
   const container = document.getElementById('aiMessagesContainer');
   if (!container) return;
 
   const msgDiv = document.createElement('div');
   msgDiv.className = 'ai-message ai-message-assistant';
+
+  let actionsHtml = '';
+  if (actions && actions.length > 0) {
+    actionsHtml = `
+      <div class="ai-actions-wrapper" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+        ${actions.map(a => `<button class="ai-action-btn" data-prompt="${escapeHtmlAttr(a.prompt || a.label)}" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 1px solid rgba(56,189,248,0.4); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s;">${escapeHtml(a.label)}</button>`).join('')}
+      </div>
+    `;
+  }
 
   let followUpsHtml = '';
   if (followUps && followUps.length > 0) {
@@ -2959,9 +2975,20 @@ function appendAssistantMessage(answer, followUps = [], source = 'Guardian AI') 
       <div class="ai-bubble-content">
         ${formatAiMarkdown(answer)}
       </div>
+      ${actionsHtml}
       ${followUpsHtml}
     </div>
   `;
+
+  // Attach click listeners to action buttons
+  msgDiv.querySelectorAll('.ai-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prompt = btn.getAttribute('data-prompt');
+      if (prompt) {
+        sendGuardianAiMessage(prompt);
+      }
+    });
+  });
 
   // Attach click listeners to follow-up chips
   msgDiv.querySelectorAll('.ai-followup-chip').forEach(btn => {
@@ -3011,8 +3038,8 @@ async function sendGuardianAiMessage(question) {
 
     const answerText = data.answer || data.reply || (data.success && data.message);
     if (answerText) {
-      const sourceName = data.source === 'ollama' ? 'Guardian AI (Local Qwen)' : 'Guardian AI (Security Analyst)';
-      appendAssistantMessage(answerText, data.followUps || [], sourceName);
+      const sourceName = data.source === 'ollama' ? 'Guardian AI (Local Qwen)' : (data.source === 'agent_executor' ? 'Guardian Action Agent' : 'Guardian AI (Security Analyst)');
+      appendAssistantMessage(answerText, data.followUps || [], sourceName, data.actions || []);
       guardianAiState.conversationHistory.push({ role: 'assistant', content: answerText });
     } else {
       const liveConns = state.summary ? state.summary.activeConnections : '240+';

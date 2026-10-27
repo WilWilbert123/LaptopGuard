@@ -83,10 +83,10 @@ class SecurityPostureEvaluator {
         $ts = Get-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -ErrorAction SilentlyContinue
         $nla = Get-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -ErrorAction SilentlyContinue
         $ra = Get-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Remote Assistance' -ErrorAction SilentlyContinue
-        $guest = Get-CimInstance Win32_UserAccount -Filter "Name='Guest'" -ErrorAction SilentlyContinue
-        $secBoot = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
-        $tpm = Get-Tpm -ErrorAction SilentlyContinue
-        $fw = Get-NetFirewallProfile -ErrorAction SilentlyContinue | Select-Object Name, Enabled
+        $guest = try { (Get-LocalUser -Name 'Guest' -ErrorAction Stop) } catch { $null }
+        $secBoot = try { (Confirm-SecureBootUEFI -ErrorAction Stop) } catch { $null }
+        $tpm = try { (Get-Tpm -ErrorAction Stop) } catch { $null }
+        $fw = try { (Get-NetFirewallProfile -ErrorAction Stop | Select-Object Name, Enabled) } catch { $null }
 
         [PSCustomObject]@{
           UacEnabled = if ($uac) { $uac.EnableLUA } else { $null }
@@ -95,7 +95,7 @@ class SecurityPostureEvaluator {
           RdpDeny = if ($ts) { $ts.fDenyTSConnections } else { $null }
           RdpNla = if ($nla) { $nla.UserAuthentication } else { $null }
           RemoteAssistance = if ($ra) { $ra.fAllowToGetHelp } else { $null }
-          GuestDisabled = if ($guest) { $guest.Disabled } else { $true }
+          GuestDisabled = if ($guest) { -not $guest.Enabled } else { $true }
           SecureBoot = $secBoot
           TpmPresent = if ($tpm) { $tpm.TpmPresent } else { $null }
           TpmReady = if ($tpm) { $tpm.TpmReady } else { $null }
@@ -103,7 +103,7 @@ class SecurityPostureEvaluator {
         }
       `;
 
-      const raw = await psHost.execute(script, { timeoutMs: 9000, asJson: true }) || {};
+      const raw = await psHost.execute(script, { timeoutMs: 15000, asJson: true }) || {};
 
       // Get latest Defender telemetry from database or memory
       const latestHealth = db.getLatestHealth();

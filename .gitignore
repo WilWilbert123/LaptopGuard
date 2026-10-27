@@ -22,3 +22,20 @@ Thumbs.db
 test_out/
 .system_generated/
 dist/
+dist/*
+installer/*.exe
+
+# .NET & Native Build & Publish outputs
+bin/
+obj/
+publish/
+**/bin/
+**/obj/
+**/publish/
+*.exe
+*.dll
+*.pdb
+*.zip
+*.tar.gz
+*.iso
+*.user
